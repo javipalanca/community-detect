@@ -12,8 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License. """
 
-
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 # Name:        community-detect.py
 # Purpose:     A community detection module based on my research paper :
 #              *Paper yet to be published*
@@ -24,7 +23,7 @@ limitations under the License. """
 # Created:     28/06/2016
 # Copyright:   Copyright 2016 Ankush Bhatia
 # Licence:     Apache License 2.0
-#-------------------------------------------------------------------------------
+# -------------------------------------------------------------------------------
 
 import networkx as nx
 
@@ -35,8 +34,9 @@ from collections import defaultdict
 import matplotlib.pyplot as plt
 import random
 
+
 class Community(object):
-    def __init__(self, alpha_weight = 0.5):
+    def __init__(self, alpha_weight=0.5):
         self.alpha = alpha_weight
         random.seed()
         self.MIN_VALUE = 0.0000001
@@ -48,7 +48,7 @@ class Community(object):
     # Date : 25th Nov 2015
     # Name : 'louvain-python'
     # Version : "0.0.1"
-    #To convert an IGraph to NetworkX Graph
+    # To convert an IGraph to NetworkX Graph
     def convertIGraphToNxGraph(cls, igraph):
         nodenames = igraph.vs["name"]
         edges = igraph.get_edgelist()
@@ -68,14 +68,14 @@ class Community(object):
         convert_graph.add_weighted_edges_from(convertlist)
         return convert_graph
 
-    #Updating Nodes weight
+    # Updating Nodes weight
     def updateNodeWeights(self, edgeweights):
         nodeweights = defaultdict(float)
         for node in edgeweights.keys():
             nodeweights[node] = sum([weight for weight in edgeweights[node].values()])
         return nodeweights
 
-    #Main function of Louvain Algorithm
+    # Main function of Louvain Algorithm
     def getPartition(self, graph, param=1.):
         node2com, edge_weights = self._setNode2Com(graph)
         node2com = self.runFirstPhase(node2com, edge_weights, param)
@@ -94,7 +94,7 @@ class Community(object):
             new_edge_weights = new_edge_weights_
         return partition
 
-    #Newmann Modularity
+    # Newmann Modularity
     def ComputeModularity(self, node2com, edge_weights, param):
         q = 0
         all_edge_weights = sum(
@@ -208,15 +208,14 @@ class Community(object):
                 edge_weights[node][edge[0]] = edge[1]["weight"]
         return node2com, edge_weights
 
-
     def make_k_nearest_neighbour_graph(self, Graph, vertices, k, similarity_matrix, similarity_matrix_type='cosine'):
-        #Directed Graph
+        # Directed Graph
         knng = nx.DiGraph()
 
-        #Iteration over all vertices
+        # Iteration over all vertices
         for i in vertices:
 
-            #Similarity list of i with all other vertices
+            # Similarity list of i with all other vertices
             sim_i = []
             for j in range(len(similarity_matrix[i])):
                 if j != i:
@@ -225,7 +224,7 @@ class Community(object):
                     else:
                         g = 1
                     if j in Graph[i]:
-                        g = abs(g-1)
+                        g = abs(g - 1)
                     sim = self.alpha * g + (1 - self.alpha) * float(similarity_matrix[i][j])
                     sim_i.append((sim, j))
             sim_i.sort(reverse=True)
@@ -235,26 +234,26 @@ class Community(object):
         return knng
 
     def get_communities(self, Graph, vertices, similarity_matrix, similarity_matrix_type='cosine'):
-        #try:
-            #Total Edges
-            m = len(Graph.edges())
-            # Setting k for knn graph
-            k = (m // len(vertices))
-            #Making a k-nearest-neighbour-graph
-            knng = self.make_k_nearest_neighbour_graph(Graph=Graph, vertices=vertices, k=k,
+        # try:
+        # Total Edges
+        m = len(Graph.edges())
+        # Setting k for knn graph
+        k = (m // len(vertices))
+        # Making a k-nearest-neighbour-graph
+        knng = self.make_k_nearest_neighbour_graph(Graph=Graph, vertices=vertices, k=k,
                                                    similarity_matrix=similarity_matrix,
                                                    similarity_matrix_type=similarity_matrix_type)
 
-            #Getting communities
-            partition = self.getPartition(knng)
-            communities = defaultdict(list)
-            for node, com_id in partition.items():
-                communities[com_id].append(node)
-            return communities
-        #except Exception as err:
+        # Getting communities
+        partition = self.getPartition(knng)
+        communities = defaultdict(list)
+        for node, com_id in partition.items():
+            communities[com_id].append(node)
+        return communities
+        # except Exception as err:
         #    print(err)
 
-    #Requires Matplotlib
+    # Requires Matplotlib
     def view_communities(self, communities, Graph, vertices, similarity_matrix, similarity_matrix_type):
         try:
             # Total Edges
@@ -263,21 +262,22 @@ class Community(object):
             k = (m // len(vertices))
             # Making a k-nearest-neighbour-graph
             knngraph = self.make_k_nearest_neighbour_graph(Graph=Graph, vertices=vertices, k=k,
-                                                       similarity_matrix=similarity_matrix,
-                                                       similarity_matrix_type=similarity_matrix_type)
-            #Viewing Graph
+                                                           similarity_matrix=similarity_matrix,
+                                                           similarity_matrix_type=similarity_matrix_type)
+            # Viewing Graph
             pos = nx.spring_layout(knngraph)
             red_edges = []
             blue_edges = []
 
-            colors = ['r', 'b', 'g', '#FF0099', '#660066', '#FFFFFF', '#000000', '#123456', '#00FFFF', '#A056F2', '#888888',
-                 '#AABBCC',
-                 '#BFCFDF', '#500000', '#EFFEEF']
+            colors = ['r', 'b', 'g', '#FF0099', '#660066', '#FFFFFF', '#000000', '#123456', '#00FFFF', '#A056F2',
+                      '#888888',
+                      '#AABBCC',
+                      '#BFCFDF', '#500000', '#EFFEEF']
             i = 0
             for com, nodes in communities.items():
                 nx.draw_networkx_nodes(knngraph, pos, cmap=plt.get_cmap('jet'), nodelist=nodes,
-                                   node_size=100, node_color=colors[(i-1)%len(communities)])
-                i+=1
+                                       node_size=100, node_color=colors[(i - 1) % len(communities)])
+                i += 1
 
             for edge in knngraph.edges():
                 found = False
@@ -293,4 +293,3 @@ class Community(object):
             return plt
         except Exception as err:
             print(err)
-

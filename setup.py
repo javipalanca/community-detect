@@ -2,10 +2,9 @@ from distutils.core import setup
 
 setup(
     name='community_detect',
-    version='1.0.0',
+    version='1.0.0_1',
     packages=['community_detect'],
-    url = 'https://github.com/asshatter/community-detect',
-    download_url = 'https://github.com/asshatter/community-detect/tarball/1.0.0',
+    url='https://github.com/javipalanca/community-detect',
     license='Apache License 2.0',
     install_requires=["networkx", "matplotlib"],
     author='Ankush Bhatia',
